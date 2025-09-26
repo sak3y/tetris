@@ -1,0 +1,12 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    overflow: hidden;
+    font-family: 'Courier New', Courier, monospace;
+    min-width: 100%;
+    min-height: 100%;
+    background-color: gray;
+}
