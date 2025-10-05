@@ -6,10 +6,8 @@
 
 body {
   overflow: hidden;
-  background: url(public/images/bg.png) no-repeat center center fixed;
+  background: url(assets/images/bg.png) no-repeat center center fixed;
   background-size: cover;
-  min-height: 100vh;
-  min-width: 100vw;
 }
 
 .container {
@@ -18,17 +16,18 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  min-width: 100vw;
   gap: 1rem;
 }
 
 canvas {
-  height: 60vh;
-  border: 1px solid whitesmoke;
+  height: 50vh;
+  border: 2px solid whitesmoke;
   border-top: none;
+  opacity: 0.9;
+  border-radius: 4px;
 }
 
 #score {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: white;
 }

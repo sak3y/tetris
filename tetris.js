@@ -16,13 +16,13 @@ const arenaSweep = () => {
     arena.unshift(row); // Unsure
     ++i; // Increment the column once cleared
 
+    // Gives player points
     player.score += rowScore * 10;
     rowScore *= 2;
   }
 };
 
-// Checks player piece matrix with arena matrix to see if values are the occupied.
-// Retuns true if occupied
+// Checks player piece matrix with arena matrix to see if values are the occupied. Retuns true if occupied
 const collision = (player, arena) => {
   const [m, o] = [player.matrix, player.pos];
 
@@ -113,7 +113,7 @@ const merge = (player, arena) => {
   });
 };
 
-// Control position and pieces
+// Player object
 const player = {
   pos: { x: 0, y: 0 },
   matrix: null,
@@ -124,15 +124,34 @@ const colours = [null, "#FF4136", "#FFDC00", "#2ECC40", "#B10DC9", "#FF851B", "#
 
 const draw = () => {
   // Canvas
-  context.fillStyle = "#000";
+  context.fillStyle = "#0f0f0fff";
   context.fillRect(0, 0, canvas.width, canvas.height);
+
+  context.strokeStyle = "#282727ff"; //  grid colour
+  context.lineWidth = 1;
+
+  // Draw the grid
+  for (let x = 0; x < canvas.width; x += scale) {
+    context.beginPath();
+    context.moveTo(x, 0);
+    context.lineTo(x, canvas.height);
+    context.stroke();
+  }
+
+  for (let y = 0; y < canvas.height; y += scale) {
+    context.beginPath();
+    context.moveTo(0, y);
+    context.lineTo(canvas.width, y);
+    context.stroke();
+  }
 
   // draw pieces
   drawMatrix(arena, { x: 0, y: 0 });
   drawMatrix(player.matrix, player.pos);
 };
 
-const scale = 20;
+// Dimensions
+const scale = 10;
 canvas.width = arena[0].length * scale;
 canvas.height = arena.length * scale;
 
@@ -140,13 +159,39 @@ canvas.height = arena.length * scale;
 const drawMatrix = (matrix, offset) => {
   matrix.forEach((row, y) => {
     row.forEach((value, x) => {
-      // Colour in pixels
+      // Fill in pieces
       if (value >= 1) {
+        const px = (x + offset.x) * scale;
+        const py = (y + offset.y) * scale;
+
+        // Gives colour
         context.fillStyle = colours[value];
-        context.fillRect((x + offset.x) * scale, (y + offset.y) * scale, scale, scale);
+        context.fillRect(px, py, scale, scale);
+        // Gives grid look
+        context.strokeStyle = "#151515ff";
+        context.lineWidth = 0.5;
+        context.strokeRect(px, py, scale, scale);
       }
     });
   });
+};
+
+const playSound = (key) => {
+  // if (key === 1) {
+  //   const audio = new Audio("assets/sounds/");
+  //   try {
+  //     audio.play();
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // } else if (key === 2) {
+  //   const audio = new Audio("assets/sounds/movepiece.mp3");
+  //   try {
+  //     audio.play();
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 };
 
 let dropCounter = 0;
@@ -157,7 +202,8 @@ let prevTime = 0;
 const playerDrop = () => {
   player.pos.y++;
 
-  // Bottom border collision checks for piece
+  // Bottom border collision checks for piece + resets piece + checks to see if 
+  // the row is full and clears it + updates the score and resets the players position
   if (collision(player, arena)) {
     player.pos.y--;
     merge(player, arena);
@@ -170,9 +216,22 @@ const playerDrop = () => {
   dropCounter = 0;
 };
 
+// Instantly place a piece
+const playerPlace = () => {
+  while (!collision(player, arena)) {
+    player.pos.y++;
+  }
+  player.pos.y--;
+  merge(player, arena);
+  playerReset();
+  arenaSweep();
+  updateScore();
+};
+
 // Controls for player to move left and right
 const playerMove = (dir) => {
   player.pos.x += dir;
+  playSound(1);
 
   // Piece collisions checks with side borders
   if (collision(player, arena)) {
@@ -180,6 +239,7 @@ const playerMove = (dir) => {
   }
 };
 
+// Resets pieces
 const playerReset = () => {
   const pieces = "LISTJOZ";
 
@@ -187,6 +247,7 @@ const playerReset = () => {
   player.pos.y = 0;
   player.pos.x = ((arena[0].length / 2) | 0) - ((player.matrix[0].length / 2) | 0);
 
+  // Reset stats on loss and clear rows
   if (collision(player, arena)) {
     player.score = 0;
     updateScore();
@@ -249,18 +310,20 @@ const updateScore = () => {
   document.getElementById("score").innerText = player.score;
 };
 
-// Controls
+// Player controls
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") playerMove(-1);
   else if (e.key === "ArrowRight") playerMove(1);
-  else if (e.key === "ArrowDown") playerDrop();
-  else if (e.key === " ") playerDrop(); // Spacebar
+  else if (e.key === "ArrowDown") {
+    playSound(1);
+    playerDrop();
+  } else if (e.key === " ") playerPlace(); // Spacebar
   else if (e.key === "ArrowUp") playerRotate(1);
   else if (e.key === "a" || e.key === "A") {
     playerRotate(1);
     playerRotate(1);
-  } else if (e.key === "z" | e.key === "Z") playerRotate(1);
-  else if (e.key === "x" | e.key === "X") playerRotate(-1);
+  } else if ((e.key === "z") | (e.key === "Z")) playerRotate(1);
+  else if ((e.key === "x") | (e.key === "X")) playerRotate(-1);
 });
 
 playerReset();
