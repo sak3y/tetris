@@ -1,18 +1,13 @@
 * {
   padding: 0;
   margin: 0;
-  font-family:Verdana, Geneva, Tahoma, sans-serif;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 body {
   overflow: hidden;
-  min-height: 100vh;
-  min-width: 100vw;
-}
-
-img {
-  z-index: -1;
-  position: fixed;
+  background: url(public/images/bg.png) no-repeat center center fixed;
+  background-size: cover;
   min-height: 100vh;
   min-width: 100vw;
 }
@@ -28,7 +23,6 @@ img {
 }
 
 canvas {
-
   height: 60vh;
   border: 1px solid whitesmoke;
   border-top: none;
