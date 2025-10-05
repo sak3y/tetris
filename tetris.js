@@ -156,7 +156,7 @@ const draw = () => {
 };
 
 // Dimensions
-const scale = 10;
+const scale = 50;
 canvas.width = arena[0].length * scale;
 canvas.height = arena.length * scale;
 
@@ -174,7 +174,7 @@ const drawMatrix = (matrix, offset) => {
         context.fillRect(px, py, scale, scale);
         // Gives grid look
         context.strokeStyle = "#151515ff";
-        context.lineWidth = 0.5;
+        context.lineWidth = 1;
         context.strokeRect(px, py, scale, scale);
       }
     });

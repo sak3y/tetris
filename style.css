@@ -29,11 +29,22 @@ canvas {
 
 .scores {
   display: flex;
-  gap: 5px
+  align-items: center;
+  gap: 5px;
 }
 
-#score,
-#status {
+#score {
   font-size: 1rem;
   color: white;
+}
+
+#status {
+  font-size: 0.9rem;
+  color: rgb(0, 230, 11);
+}
+
+@media (min-width: 625px) {
+  canvas {
+    height: 60vh;
+  }
 }
