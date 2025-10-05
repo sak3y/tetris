@@ -1,13 +1,25 @@
 const canvas = document.getElementById("canvas");
 const context = canvas.getContext("2d");
 
-// Matrix representation for pieces
-const matrix = [
-  // T piece
-  [0, 0, 0],
-  [1, 1, 1],
-  [0, 1, 0],
-];
+// Clear a row each time it's filled
+const arenaSweep = () => {
+  let rowScore = 1;
+  // Continue if the row contains a 0
+  outer: for (let i = arena.length - 1; i > 0; --i) {
+    for (let j = 0; j < arena[i].length; ++j) {
+      if (arena[i][j] === 0) {
+        continue outer;
+      }
+    }
+    // Clear is all row elements != 0
+    const row = arena.splice(i, 1)[0].fill(0);
+    arena.unshift(row); // Unsure
+    ++i; // Increment the column once cleared
+
+    player.score += rowScore * 10;
+    rowScore *= 2;
+  }
+};
 
 // Checks player piece matrix with arena matrix to see if values are the occupied.
 // Retuns true if occupied
@@ -35,13 +47,66 @@ const createMatrix = (w, h) => {
   return matrix;
 };
 
+const createPiece = (type) => {
+  if (type === "T") {
+    return [
+      // T piece
+      [0, 0, 0],
+      [1, 1, 1],
+      [0, 1, 0],
+    ];
+  } else if (type === "O") {
+    return [
+      // Box piece
+      [2, 2],
+      [2, 2],
+    ];
+  } else if (type === "L") {
+    return [
+      // L piece
+      [0, 3, 0],
+      [0, 3, 0],
+      [0, 3, 3],
+    ];
+  } else if (type === "J") {
+    return [
+      // J piece
+      [0, 4, 0],
+      [0, 4, 0],
+      [4, 4, 0],
+    ];
+  } else if (type === "S") {
+    return [
+      // S piece
+      [0, 5, 5],
+      [5, 5, 0],
+      [0, 0, 0],
+    ];
+  } else if (type === "Z") {
+    return [
+      // Z piece
+      [6, 6, 0],
+      [0, 6, 6],
+      [0, 0, 0],
+    ];
+  } else if (type === "I") {
+    return [
+      // Line piece
+      [0, 7, 0, 0],
+      [0, 7, 0, 0],
+      [0, 7, 0, 0],
+      [0, 7, 0, 0],
+    ];
+  }
+};
+
 const arena = createMatrix(10, 20);
 
 // Combine player matrix with arena
 const merge = (player, arena) => {
   player.matrix.forEach((row, y) => {
     row.forEach((value, x) => {
-      if (value === 1) {
+      if (value >= 1) {
         arena[y + player.pos.y][x + player.pos.x] = value;
       }
     });
@@ -50,9 +115,12 @@ const merge = (player, arena) => {
 
 // Control position and pieces
 const player = {
-  pos: { x: Math.floor(arena[0].length / 2) - 1, y: 0 },
-  matrix: matrix,
+  pos: { x: 0, y: 0 },
+  matrix: null,
+  score: 0,
 };
+
+const colours = [null, "#FF4136", "#FFDC00", "#2ECC40", "#B10DC9", "#FF851B", "#F012BE", "#0074D9"];
 
 const draw = () => {
   // Canvas
@@ -73,8 +141,8 @@ const drawMatrix = (matrix, offset) => {
   matrix.forEach((row, y) => {
     row.forEach((value, x) => {
       // Colour in pixels
-      if (value === 1) {
-        context.fillStyle = "red";
+      if (value >= 1) {
+        context.fillStyle = colours[value];
         context.fillRect((x + offset.x) * scale, (y + offset.y) * scale, scale, scale);
       }
     });
@@ -93,6 +161,9 @@ const playerDrop = () => {
   if (collision(player, arena)) {
     player.pos.y--;
     merge(player, arena);
+    playerReset();
+    arenaSweep();
+    updateScore();
     player.pos.y = 0;
   }
 
@@ -109,9 +180,37 @@ const playerMove = (dir) => {
   }
 };
 
-// Controls to rotate piece
+const playerReset = () => {
+  const pieces = "LISTJOZ";
+
+  player.matrix = createPiece(pieces[(pieces.length * Math.random()) | 0]);
+  player.pos.y = 0;
+  player.pos.x = ((arena[0].length / 2) | 0) - ((player.matrix[0].length / 2) | 0);
+
+  if (collision(player, arena)) {
+    player.score = 0;
+    updateScore();
+    arena.forEach((row) => row.fill(0));
+  }
+};
+
+// Controls for piece rotation
 const playerRotate = (dir) => {
-  rotate(player.matrix, dir);
+  const pos = player.pos.x;
+  let offset = 1;
+
+  rotate(player.matrix, dir); // Rotates pieces in direction
+
+  // Rotation checks with borders
+  while (collision(player, arena)) {
+    player.pos.x += offset;
+    offset = -(offset + (offset > 0 ? 1 : -1));
+    if (offset > player.matrix[0].length) {
+      rotate(player.matrix, -dir);
+      player.pos.x = pos;
+      return;
+    }
+  }
 };
 
 // Rotates the pieces => don't understand how tho
@@ -146,14 +245,23 @@ const update = (time = 0) => {
   requestAnimationFrame(update);
 };
 
+const updateScore = () => {
+  document.getElementById("score").innerText = player.score;
+};
+
 // Controls
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") playerMove(-1);
   else if (e.key === "ArrowRight") playerMove(1);
   else if (e.key === "ArrowDown") playerDrop();
   else if (e.key === " ") playerDrop(); // Spacebar
-  else if (e.key === "a") playerRotate(-1);
-  else if (e.key === "d") playerRotate(1);
+  else if (e.key === "ArrowUp") playerRotate(1);
+  else if (e.key === "a" || e.key === "A") {
+    playerRotate(1);
+    playerRotate(1);
+  } else if (e.key === "z" | e.key === "Z") playerRotate(1);
+  else if (e.key === "x" | e.key === "X") playerRotate(-1);
 });
 
+playerReset();
 update();
