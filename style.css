@@ -27,7 +27,13 @@ canvas {
   border-radius: 4px;
 }
 
-#score {
+.scores {
+  display: flex;
+  gap: 5px
+}
+
+#score,
+#status {
   font-size: 1rem;
   color: white;
 }

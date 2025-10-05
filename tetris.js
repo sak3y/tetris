@@ -18,7 +18,12 @@ const arenaSweep = () => {
 
     // Gives player points
     player.score += rowScore * 10;
+    document.getElementById("status").innerHTML = `+${rowScore * 10}`;
     rowScore *= 2;
+
+    setTimeout(() => {
+      document.getElementById("status").innerHTML = "";
+    }, 2500);
   }
 };
 
@@ -202,7 +207,7 @@ let prevTime = 0;
 const playerDrop = () => {
   player.pos.y++;
 
-  // Bottom border collision checks for piece + resets piece + checks to see if 
+  // Bottom border collision checks for piece + resets piece + checks to see if
   // the row is full and clears it + updates the score and resets the players position
   if (collision(player, arena)) {
     player.pos.y--;
