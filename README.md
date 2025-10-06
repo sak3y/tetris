@@ -10,7 +10,7 @@ A tutorial project acting as an intro into game dev with my own touches.
 - Player interaction with pieces
 - Handling edge cases
 
-## Demo Video (Coming soon) 🎥
+## Demo Video 🎥
 
 https://github.com/user-attachments/assets/41607456-b192-45c0-a57e-958c10ad61b4
 
